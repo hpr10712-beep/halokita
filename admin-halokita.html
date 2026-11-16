@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="color-scheme" content="dark">
+<title>Admin HaloKita</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400..800&family=Unbounded:wght@500..800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#06140f;--s1:#0b1f17;--s2:#12301f;--ln:rgba(214,255,190,.12);--tx:#eef5e1;--sub:#86a392;--acc:#c9f73a;--co:#ff6b57;--fd:"Unbounded",system-ui,sans-serif;--fb:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+*{box-sizing:border-box;margin:0}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{font:500 14px/1.45 var(--fb);background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;border-radius:12px;padding:9px 14px;font-weight:700;background:var(--s2);color:var(--tx);transition:filter .2s,transform .15s}
+button:hover{filter:brightness(1.1)}
+button:active{transform:scale(.96)}
+button:disabled{opacity:.5;cursor:default}
+button.p{background:var(--acc);color:#06140f}
+button.d{background:var(--co);color:#06140f}
+input,textarea{width:100%;background:var(--s2);border:1.5px solid transparent;border-radius:12px;padding:10px 12px;outline:none}
+input:focus,textarea:focus{border-color:var(--acc)}
+textarea{resize:vertical}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+h1{font:800 22px var(--fd);letter-spacing:-.03em}
+h1 span{color:var(--acc)}
+h2{font:700 17px var(--fd);margin-bottom:14px}
+.sub,small{color:var(--sub);font-size:13px;font-weight:600}
+.card{background:var(--s1);border:1px solid var(--ln);border-radius:18px;padding:16px}
+.grid{display:grid;gap:12px}
+.stats{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.stat b{display:block;font:700 26px var(--fd);color:var(--acc)}
+.stat span{color:var(--sub);font-size:13px}
+#login{height:100%;display:grid;place-items:center;padding:20px}
+.lg{width:100%;max-width:360px;display:grid;gap:12px}
+#err{color:var(--co);font-size:13px;font-weight:600;min-height:1em}
+#app{height:100%;display:flex}
+nav{width:210px;flex:none;background:var(--s1);border-right:1px solid var(--ln);padding:16px;display:flex;flex-direction:column;gap:6px;overflow-y:auto}
+nav .brand{font:800 18px var(--fd);color:var(--acc)}
+nav #who{margin:0 0 12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+nav button{text-align:left;background:none;color:var(--sub)}
+nav button.on{background:var(--s2);color:var(--tx)}
+nav .out{margin-top:auto;color:var(--co);background:none}
+main{flex:1;min-width:0;overflow:auto;padding:20px}
+.toolbar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.toolbar input{max-width:340px}
+.form{display:grid;gap:8px;margin-bottom:14px}
+.rowf{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--ln);flex-wrap:wrap}
+.row:last-child{border-bottom:0}
+.info{flex:1;min-width:180px}
+.msg{margin:8px 0 0;white-space:pre-wrap;word-break:break-word}
+.ava{width:40px;height:40px;border-radius:50%;background:var(--s2);display:grid;place-items:center;font-weight:800;color:var(--acc);flex:none}
+.thumb{width:72px;height:72px;border-radius:12px;object-fit:cover;flex:none}
+.tag{display:inline-block;font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px;background:var(--s2);color:var(--sub);margin-left:4px}
+.tag.y{background:var(--acc);color:#06140f}
+.tag.r{background:var(--co);color:#06140f}
+.empty{color:var(--sub);padding:24px 0;text-align:center}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--acc);color:#06140f;padding:10px 16px;border-radius:12px;font-weight:700;z-index:9;max-width:90vw;text-align:center}
+@media(max-width:720px){
+  #app{flex-direction:column}
+  nav{width:auto;flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--ln);padding:10px;gap:6px}
+  nav .brand,nav #who{display:none}
+  nav button{white-space:nowrap}
+  nav .out{margin-top:0;margin-left:auto}
+  main{padding:14px}
+}
+</style>
+</head>
+<body>
+
+<form id="login" hidden>
+  <div class="card lg" id="lf">
+    <h1>Admin <span>HaloKita</span></h1>
+    <p class="sub">Masuk dengan akun admin.</p>
+    <input id="le" type="email" placeholder="Email" autocomplete="username" required>
+    <input id="lp" type="password" placeholder="Kata sandi" autocomplete="current-password" required>
+    <button class="p" id="lb" type="submit">Masuk</button>
+    <div id="err"></div>
+  </div>
+</form>
+
+<div id="app" hidden>
+  <nav>
+    <div class="brand">HaloKita</div>
+    <small id="who"></small>
+    <button data-t="dash" class="on">Ringkasan</button>
+    <button data-t="users">Pengguna</button>
+    <button data-t="appeals">Banding</button>
+    <button data-t="reports">Laporan</button>
+    <button data-t="news">Berita</button>
+    <button data-t="groups">Grup</button>
+    <button id="out" class="out">Keluar</button>
+  </nav>
+  <main>
+    <div id="bar"></div>
+    <div id="list"></div>
+  </main>
+</div>
+<div id="toast" hidden></div>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getDatabase, ref, get, onValue, update, push, remove} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+/* Konfigurasi sama dengan halokita (proyek mygame-68b24).
+   Kata sandi di bawah terlihat di kode sumber halaman; perlindungan data yang sebenarnya ada di aturan Realtime Database. */
+const fb = initializeApp({
+  apiKey: "AIzaSyBEPzUM9EresZ-yvphzDusVs7AUqdLuCNQ",
+  authDomain: "mygame-68b24.firebaseapp.com",
+  databaseURL: "https://mygame-68b24-default-rtdb.firebaseio.com",
+  projectId: "mygame-68b24",
+  storageBucket: "mygame-68b24.firebasestorage.app",
+  messagingSenderId: "1003182873390",
+  appId: "1:1003182873390:web:aabf3248f759cbc9d678bf"
+});
+const auth = getAuth(fb), db = getDatabase(fb);
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+const tgl = t => t ? new Date(t).toLocaleString('id-ID', {dateStyle: 'medium', timeStyle: 'short'}) : '-';
+const ini = s => esc(String(s || '?')[0].toUpperCase());
+const cut = (s, n) => String(s ?? '').trim().slice(0, n);
+const isOpen = r => r.st !== 'closed';
+
+let D = {users: {}, bans: {}, appeals: {}, reports: {}, verified: {}, news: {}, groups: {}};
+let me = null, tab = 'dash', q = '', rf = 'open', live = false;
+
+function toast(m) {
+  const t = $('#toast'); t.textContent = m; t.hidden = false;
+  clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 2600);
+}
+async function run(p, msg) {
+  try { await p; if (msg) toast(msg); }
+  catch (e) { toast('Gagal: ' + (e.code || e.message)); }
+}
+
+/* ---------- Masuk: hanya satu akun yang diizinkan ---------- */
+const ALLOW_EMAIL = 'radityahadipangestu23@gmail.com';
+const ALLOW_PASS = 'ngatimah';
+
+$('#login').addEventListener('submit', async e => {
+  e.preventDefault();
+  const em = $('#le').value.trim().toLowerCase(), pw = $('#lp').value;
+  if (em !== ALLOW_EMAIL || pw !== ALLOW_PASS) { $('#err').textContent = 'Email atau kata sandi salah.'; return; }
+  const b = $('#lb'); b.disabled = true; $('#err').textContent = '';
+  try { await signInWithEmailAndPassword(auth, ALLOW_EMAIL, ALLOW_PASS); }
+  catch (x) { $('#err').textContent = 'Gagal masuk: ' + (x.code || x.message); }
+  finally { b.disabled = false; }
+});
+$('#out').onclick = () => signOut(auth);
+
+function show(s) { $('#login').hidden = s !== 'login'; $('#app').hidden = s !== 'app'; }
+
+onAuthStateChanged(auth, u => {
+  if (!u || (u.email || '').toLowerCase() !== ALLOW_EMAIL) {
+    if (u) signOut(auth);
+    me = null; show('login'); return;
+  }
+  me = u;
+  $('#who').textContent = u.email;
+  show('app');
+  if (!live) startData();
+  mount();
+});
+
+/* ---------- Data realtime ---------- */
+function startData() {
+  live = true;
+  for (const k of Object.keys(D)) {
+    onValue(ref(db, k), s => { D[k] = s.val() || {}; paint(); }, () => toast('Akses ditolak untuk ' + k));
+  }
+}
+
+/* ---------- Navigasi ---------- */
+document.querySelectorAll('nav [data-t]').forEach(b => b.onclick = () => { tab = b.dataset.t; mount(); });
+
+const BAR = {
+  users: () => `<div class="toolbar"><input id="qs" placeholder="Cari nama, @username, atau UID" value="${esc(q)}"></div>`,
+  reports: () => `<div class="toolbar">
+    <button data-a="repFilter" data-x="open" class="${rf === 'open' ? 'p' : ''}">Terbuka</button>
+    <button data-a="repFilter" data-x="all" class="${rf === 'all' ? 'p' : ''}">Semua</button></div>`,
+  news: () => `<div class="card form">
+    <textarea id="nt" rows="3" placeholder="Isi berita"></textarea>
+    <input id="ni" placeholder="URL gambar https:// (opsional)">
+    <div><button class="p" data-a="newsAdd">Terbitkan</button></div></div>`
+};
+
+const LIST = {
+  dash() {
+    const users = Object.values(D.users);
+    const st = [
+      ['Pengguna', users.length],
+      ['Sedang online', users.filter(u => u.online).length],
+      ['Diblokir', Object.keys(D.bans).length],
+      ['Banding masuk', Object.keys(D.appeals).length],
+      ['Laporan terbuka', Object.values(D.reports).filter(isOpen).length],
+      ['Terverifikasi', Object.values(D.verified).filter(Boolean).length],
+      ['Grup & saluran', Object.keys(D.groups).length],
+      ['Berita', Object.keys(D.news).length]
+    ];
+    return '<div class="grid stats">' + st.map(([l, n]) => `<div class="card stat"><b>${n}</b><span>${l}</span></div>`).join('') + '</div>';
+  },
+
+  users() {
+    const all = Object.entries(D.users);
+    const rows = all
+      .filter(([id, u]) => !q || [u.name, u.username, id].some(v => String(v || '').toLowerCase().includes(q)))
+      .sort((a, b) => (b[1].online ? 1 : 0) - (a[1].online ? 1 : 0) || String(a[1].username || '').localeCompare(String(b[1].username || '')))
+      .slice(0, 150);
+    if (!rows.length) return '<div class="empty">Pengguna tidak ditemukan.</div>';
+    const html = rows.map(([id, u]) => {
+      const banned = !!D.bans[id], ver = !!D.verified[id], i = esc(id);
+      return `<div class="row">
+        <div class="ava">${ini(u.name || u.username)}</div>
+        <div class="info"><b>${esc(u.name || '-')}</b> <span class="sub">@${esc(u.username || '-')}</span><br>
+        <small>${u.online ? '● online' : 'Terakhir: ' + tgl(u.lastSeen)}</small></div>
+        ${ver ? '<span class="tag y">Terverifikasi</span>' : ''}${banned ? '<span class="tag r">Diblokir</span>' : ''}
+        <button data-a="verify" data-id="${i}" class="${ver ? '' : 'p'}">${ver ? 'Cabut centang' : 'Verifikasi'}</button>
+        <button data-a="ban" data-id="${i}" class="${banned ? '' : 'd'}">${banned ? 'Buka blokir' : 'Blokir'}</button>
+      </div>`;
+    }).join('');
+    return html + (all.length > 150 && !q ? '<div class="empty">Menampilkan 150 pengguna pertama. Gunakan pencarian.</div>' : '');
+  },
+
+  appeals() {
+    const rows = Object.entries(D.appeals).sort((a, b) => (b[1].ts || 0) - (a[1].ts || 0));
+    if (!rows.length) return '<div class="empty">Tidak ada banding.</div>';
+    return rows.map(([id, a]) => `<div class="row">
+      <div class="info"><b>${esc(a.name || '-')}</b> <span class="sub">@${esc(a.user || '-')}</span><br>
+      <small>Alasan blokir: ${esc(D.bans[id]?.reason || '-')} · ${tgl(a.ts)}</small>
+      <p class="msg">${esc(a.text)}</p></div>
+      <button data-a="appealOk" data-id="${esc(id)}" class="p">Terima</button>
+      <button data-a="appealNo" data-id="${esc(id)}" class="d">Tolak</button>
+    </div>`).join('') || '<div class="empty">Tidak ada banding.</div>';
+  },
+
+  reports() {
+    const rows = Object.entries(D.reports)
+      .filter(([, r]) => rf === 'all' || isOpen(r))
+      .sort((a, b) => (b[1].ts || 0) - (a[1].ts || 0));
+    if (!rows.length) return '<div class="empty">Tidak ada laporan.</div>';
+    return rows.map(([id, r]) => `<div class="row">
+      <div class="info"><b>${esc(r.targetName || '-')}</b> <span class="sub">@${esc(r.targetUser || '-')}</span>
+      <span class="tag ${isOpen(r) ? 'y' : ''}">${isOpen(r) ? 'Terbuka' : 'Selesai'}</span><br>
+      <small>Dilaporkan oleh @${esc(r.byUser || '-')} · ${tgl(r.ts)}</small>
+      <p class="msg">${esc(r.reason)}</p></div>
+      <button data-a="repBan" data-id="${esc(id)}" class="d">Blokir terlapor</button>
+      <button data-a="repDone" data-id="${esc(id)}">Selesai</button>
+      <button data-a="repDel" data-id="${esc(id)}">Hapus</button>
+    </div>`).join('');
+  },
+
+  news() {
+    const rows = Object.entries(D.news).sort((a, b) => b[0].localeCompare(a[0]));
+    if (!rows.length) return '<div class="empty">Belum ada berita.</div>';
+    return rows.map(([id, n]) => `<div class="row">
+      ${/^(https:\/\/|data:image\/)/.test(n.img || '') ? `<img class="thumb" src="${esc(n.img)}" alt="">` : ''}
+      <div class="info"><p class="msg">${esc(n.text)}</p><small>${tgl(n.ts)}</small></div>
+      <button data-a="newsDel" data-id="${esc(id)}" class="d">Hapus</button>
+    </div>`).join('');
+  },
+
+  groups() {
+    const rows = Object.entries(D.groups).sort((a, b) => (b[1].ts || 0) - (a[1].ts || 0));
+    if (!rows.length) return '<div class="empty">Belum ada grup.</div>';
+    return rows.map(([id, g]) => `<div class="row">
+      <div class="info"><b>${esc(g.name || 'Tanpa nama')}</b> <span class="tag">${g.type === 'saluran' ? 'Saluran' : 'Grup'}</span><br>
+      <small>${g.mc || 0} anggota · dibuat ${tgl(g.ts)}</small></div>
+      <button data-a="grpDel" data-id="${esc(id)}" class="d">Hapus</button>
+    </div>`).join('');
+  }
+};
+
+function mount() {
+  document.querySelectorAll('nav [data-t]').forEach(b => b.classList.toggle('on', b.dataset.t === tab));
+  $('#bar').innerHTML = BAR[tab] ? BAR[tab]() : '';
+  paint();
+}
+function paint() {
+  if (!me) return;
+  $('#list').innerHTML = LIST[tab]();
+}
+
+/* ---------- Aksi admin ---------- */
+const ACT = {
+  async verify(id) {
+    const on = !D.verified[id];
+    await run(update(ref(db), {['verified/' + id]: on ? true : null}), on ? 'Akun diverifikasi' : 'Centang dicabut');
+  },
+
+  async ban(id) {
+    if (D.bans[id]) {
+      if (!confirm('Buka blokir pengguna ini?')) return;
+      return run(update(ref(db), {['bans/' + id]: null, ['appeals/' + id]: null}), 'Blokir dibuka');
+    }
+    const r = prompt('Alasan blokir (akan terlihat oleh pengguna):');
+    if (!r || !r.trim()) return;
+    await run(update(ref(db), {['bans/' + id]: {reason: cut(r, 200), ts: Date.now()}}), 'Pengguna diblokir');
+  },
+
+  appealOk(id) {
+    if (!confirm('Terima banding? Blokir akan dicabut.')) return;
+    run(update(ref(db), {['bans/' + id]: null, ['appeals/' + id]: null}), 'Banding diterima');
+  },
+
+  async appealNo(id) {
+    const n = prompt('Catatan penolakan (opsional):');
+    if (n === null) return;
+    const up = {['appeals/' + id]: null};
+    if (D.bans[id]) up['bans/' + id + '/rej'] = {note: cut(n, 200), ts: Date.now()};
+    await run(update(ref(db), up), 'Banding ditolak');
+  },
+
+  async repBan(id) {
+    const r = D.reports[id];
+    if (!r) return;
+    if (!r.target) return toast('Laporan ini tidak punya akun terlapor');
+    if (D.bans[r.target]) return toast('Pengguna sudah diblokir');
+    const why = prompt('Alasan blokir:', cut(r.reason, 120));
+    if (!why || !why.trim()) return;
+    await run(update(ref(db), {
+      ['bans/' + r.target]: {reason: cut(why, 200), ts: Date.now()},
+      ['reports/' + id + '/st']: 'closed'
+    }), 'Terlapor diblokir');
+  },
+
+  repDone(id) { run(update(ref(db), {['reports/' + id + '/st']: 'closed'}), 'Laporan ditutup'); },
+
+  repDel(id) { if (confirm('Hapus laporan ini?')) run(remove(ref(db, 'reports/' + id)), 'Laporan dihapus'); },
+
+  repFilter(_, x) { rf = x; mount(); },
+
+  async newsAdd() {
+    const t = cut($('#nt').value, 500), img = cut($('#ni').value, 500);
+    if (!t) return toast('Isi berita dulu');
+    if (img && !/^https:\/\//.test(img)) return toast('URL gambar harus diawali https://');
+    await run(push(ref(db, 'news'), {text: t, img: img || null, ts: Date.now()}), 'Berita diterbitkan');
+    $('#nt').value = ''; $('#ni').value = '';
+  },
+
+  newsDel(id) { if (confirm('Hapus berita ini?')) run(remove(ref(db, 'news/' + id)), 'Berita dihapus'); },
+
+  grpDel(id) {
+    if (!confirm('Hapus grup ini beserta pesannya? Tidak bisa dibatalkan.')) return;
+    const up = {};
+    ['groups', 'gm', 'gmsg', 'gdel', 'grx', 'gans', 'gread'].forEach(p => up[p + '/' + id] = null);
+    run(update(ref(db), up), 'Grup dihapus');
+  }
+};
+
+/* Delegasi event: tombol di bar dan daftar, dan pencarian tanpa kehilangan fokus */
+$('main').addEventListener('click', e => {
+  const b = e.target.closest('[data-a]');
+  if (b && ACT[b.dataset.a]) ACT[b.dataset.a](b.dataset.id, b.dataset.x);
+});
+$('main').addEventListener('input', e => {
+  if (e.target.id === 'qs') { q = e.target.value.trim().toLowerCase(); paint(); }
+});
+</script>
+</body>
+</html>
